@@ -1,0 +1,286 @@
+dbx1.m//第一问的源代码
+clear;
+clc;
+[data1,count1]=imread('test1.pgm');
+[data2,count2]=imread('test2.tif');%读取图片
+figure(1)
+subplot(1,2,1);
+imshow(data1);title('test1');
+subplot(1,2,2);
+imshow(data2);title('test2');%画出原图片
+data1F=fft2(double(data1));%转换到频域
+data1F=fftshift(data1F);%将0频值放到阵列中心
+[P1,Q1]=size(data1F);
+data2F=fft2(double(data2));%转换到频域
+data2F=fftshift(data2F);%将0频值放到阵列中心
+[P2,Q2]=size(data2F);
+butterworth_n=2;
+for D0=20:20:80;
+for u=1:1:P1
+    for v=1:1:Q1
+        D(u,v)=sqrt((u-fix(P1/2))^2+(v-fix(Q1/2))^2);
+        H_b(u,v)=1/(1+(D(u,v)/D0)^(2*butterworth_n));
+        H_g(u,v)=exp(-D(u,v)^2/(2*D0^2));
+        G1_b(u,v)=H_b(u,v)*data1F(u,v);
+        G1_g(u,v)=H_g(u,v)*data1F(u,v);
+    end
+end
+data1g_b=ifftshift(G1_b);
+data1g_b=ifft2(data1g_b);%将频域转换到空域
+data1g_b=uint8(real(data1g_b));%空域中的值只取实部
+data1g_g=ifftshift(G1_g);
+data1g_g=ifft2(data1g_g);%将频域转换到空域
+data1g_g=uint8(real(data1g_g));%空域中的值只取实部
+figure(2)
+subplot(2,2,D0/20);
+imshow(data1g_b);title(['butterworth D0=',num2str(D0)]);
+figure(3)
+subplot(2,2,D0/20);
+imshow(data1g_g);title(['gaussian D0=',num2str(D0)]);
+a=0;
+a1=0;
+a2=0;
+for u=1:1:P1
+    for v=1:1:Q1
+        b1=(abs(G1_b(u,v)))^2;
+        b2=(abs(G1_g(u,v)))^2;
+        a1=a1+b1;
+        a2=a2+b2;
+        b=(abs(data1F(u,v)))^2;
+        a=a+b;
+    end
+end
+gpb1_b(D0/20)=a1/a;
+gpb1_g(D0/20)=a2/a;
+end
+for D0=20:20:80;
+for u=1:1:P2
+    for v=1:1:Q2
+        D(u,v)=sqrt((u-fix(P2/2))^2+(v-fix(Q2/2))^2);
+        H_b(u,v)=1/(1+(D(u,v)/D0)^(2*butterworth_n));
+        H_g(u,v)=exp(-D(u,v)^2/(2*D0^2));
+        G2_b(u,v)=H_b(u,v)*data2F(u,v);
+        G2_g(u,v)=H_g(u,v)*data2F(u,v);
+    end
+end
+data2g_b=ifftshift(G2_b);
+data2g_b=ifft2(data2g_b);%将频域转换到空域
+data2g_b=uint8(real(data2g_b));%空域中的值只取实部
+data2g_g=ifftshift(G2_g);
+data2g_g=ifft2(data2g_g);%将频域转换到空域
+data2g_g=uint8(real(data2g_g));%空域中的值只取实部
+figure(4)
+subplot(2,2,D0/20);
+imshow(data2g_b);title(['butterworth D0=',num2str(D0)]);
+figure(5)
+subplot(2,2,D0/20);
+imshow(data2g_g);title(['gassian D0=',num2str(D0)]);
+a=0;
+a1=0;
+a2=0;
+for u=1:1:P2
+    for v=1:1:Q2
+        b1=(abs(G2_b(u,v)))^2;
+        b2=(abs(G2_g(u,v)))^2;
+        a1=a1+b1;
+        a2=a2+b2;
+        b=(abs(data2F(u,v)))^2;
+        a=a+b;
+    end
+end
+gpb2_b(D0/20)=a1/a;
+gpb2_g(D0/20)=a2/a;
+end
+gpb1_b
+gpb1_g
+gpb2_b
+gpb2_g
+///////////////////////////////////////////////////
+dbx2.m//第二问的源代码
+clear;
+clc;
+[data1,count1]=imread('test3_corrupt.pgm');
+[data2,count2]=imread('test4 copy.bmp');%读取图片
+figure(1)
+subplot(1,2,1);
+imshow(data1);title('test3');
+subplot(1,2,2);
+imshow(data2);title('test4');%画出原图片
+data1F=fft2(double(data1));%转换到频域
+data1F=fftshift(data1F);%将0频值放到阵列中心
+[P1,Q1]=size(data1F);
+data2F=fft2(double(data2));%转换到频域
+data2F=fftshift(data2F);%将0频值放到阵列中心
+[P2,Q2]=size(data2F);
+butterworth_n=2;
+for D0=20:20:80;
+for u=1:1:P1
+    for v=1:1:Q1
+        D(u,v)=sqrt((u-fix(P1/2))^2+(v-fix(Q1/2))^2);
+        H_b(u,v)=1/(1+(D0/D(u,v))^(2*butterworth_n));
+        H_g(u,v)=1-exp(-D(u,v)^2/(2*D0^2));
+        G1_b(u,v)=H_b(u,v)*data1F(u,v);
+        G1_g(u,v)=H_g(u,v)*data1F(u,v);
+    end
+end
+data1g_b=ifftshift(G1_b);
+data1g_b=ifft2(data1g_b);%将频域转换到空域
+data1g_b=uint8(real(data1g_b));%空域中的值只取实部
+data1g_g=ifftshift(G1_g);
+data1g_g=ifft2(data1g_g);%将频域转换到空域
+data1g_g=uint8(real(data1g_g));%空域中的值只取实部
+figure(2)
+subplot(2,2,D0/20);
+imshow(data1g_b);title(['butterworth D0=',num2str(D0)]);
+figure(3)
+subplot(2,2,D0/20);
+imshow(data1g_g);title(['gaussian D0=',num2str(D0)]);
+a=0;
+a1=0;
+a2=0;
+for u=1:1:P1
+    for v=1:1:Q1
+        b1=(abs(G1_b(u,v)))^2;
+        b2=(abs(G1_g(u,v)))^2;
+        a1=a1+b1;
+        a2=a2+b2;
+        b=(abs(data1F(u,v)))^2;
+        a=a+b;
+    end
+end
+gpb1_b(D0/20)=a1/a;
+gpb1_g(D0/20)=a2/a;
+end
+for D0=20:20:80;
+for u=1:1:P2
+    for v=1:1:Q2
+        D(u,v)=sqrt((u-fix(P2/2))^2+(v-fix(Q2/2))^2);
+        H_b(u,v)=1/(1+(D0/D(u,v))^(2*butterworth_n));
+        H_g(u,v)=1-exp(-D(u,v)^2/(2*D0^2));
+        G2_b(u,v)=H_b(u,v)*data2F(u,v);
+        G2_g(u,v)=H_g(u,v)*data2F(u,v);
+    end
+end
+data2g_b=ifftshift(G2_b);
+data2g_b=ifft2(data2g_b);%将频域转换到空域
+data2g_b=uint8(real(data2g_b));%空域中的值只取实部
+data2g_g=ifftshift(G2_g);
+data2g_g=ifft2(data2g_g);%将频域转换到空域
+data2g_g=uint8(real(data2g_g));%空域中的值只取实部
+figure(4)
+subplot(2,2,D0/20);
+imshow(data2g_b);title(['butterworth D0=',num2str(D0)]);
+figure(5)
+subplot(2,2,D0/20);
+imshow(data2g_g);title(['gassian D0=',num2str(D0)]);
+a=0;
+a1=0;
+a2=0;
+for u=1:1:P2
+    for v=1:1:Q2
+        b1=(abs(G2_b(u,v)))^2;
+        b2=(abs(G2_g(u,v)))^2;
+        a1=a1+b1;
+        a2=a2+b2;
+        b=(abs(data2F(u,v)))^2;
+        a=a+b;
+    end
+end
+gpb2_b(D0/20)=a1/a;
+gpb2_g(D0/20)=a2/a;
+end
+gpb1_b
+gpb1_g
+gpb2_b
+gpb2_g
+///////////////////////////////////////////////
+dbx3.m//第三问的源代码
+clear;
+clc;
+[data1,count1]=imread('test3_corrupt.pgm');
+[data2,count2]=imread('test4 copy.bmp');%读取图片
+figure(1)
+subplot(1,2,1);
+imshow(data1);title('test3');
+subplot(1,2,2);
+imshow(data2);title('test4');%画出原图片
+data1F=fft2(double(data1));%转换到频域
+data1F=fftshift(data1F);%将0频值放到阵列中心
+[P1,Q1]=size(data1F);
+data2F=fft2(double(data2));%转换到频域
+data2F=fftshift(data2F);%将0频值放到阵列中心
+[P2,Q2]=size(data2F);
+for u=1:1:P1
+    for v=1:1:Q1
+        D(u,v)=sqrt((u-fix(P1/2))^2+(v-fix(Q1/2))^2);
+        H_l(u,v)=1+4*pi^2*D(u,v)^2;
+        H_u(u,v)=1-exp(-D(u,v)^2/(2*100^2));
+        G1_b(u,v)=H_l(u,v)*data1F(u,v);
+        G1_g(u,v)=(1+H_u(u,v))*data1F(u,v);
+    end
+end
+data1g_b=ifftshift(G1_b);
+data1g_b=ifft2(data1g_b);%将频域转换到空域
+data1g_b=uint8(real(data1g_b));%空域中的值只取实部
+data1g_g=ifftshift(G1_g);
+data1g_g=ifft2(data1g_g);%将频域转换到空域
+data1g_g=uint8(real(data1g_g));%空域中的值只取实部
+figure(2)
+subplot(1,2,1);
+imshow(data1g_b);title('laplace hp');
+subplot(1,2,2);
+imshow(data1g_g);title('unmask hp');
+a=0;
+a1=0;
+a2=0;
+for u=1:1:P1
+    for v=1:1:Q1
+        b1=(abs(G1_b(u,v)))^2;
+        b2=(abs(G1_g(u,v)))^2;
+        a1=a1+b1;
+        a2=a2+b2;
+        b=(abs(data1F(u,v)))^2;
+        a=a+b;
+    end
+end
+gpb1_b=a1/a;
+gpb1_g=a2/a;
+for u=1:1:P2
+    for v=1:1:Q2
+        D(u,v)=sqrt((u-fix(P2/2))^2+(v-fix(Q2/2))^2);
+        H_l(u,v)=1+4*pi^2*D(u,v)^2;
+        H_u(u,v)=1-exp(-D(u,v)^2/(2*100^2));
+        G2_b(u,v)=H_l(u,v)*data2F(u,v);
+        G2_g(u,v)=(1+H_u(u,v))*data2F(u,v);
+    end
+end
+data2g_b=ifftshift(G2_b);
+data2g_b=ifft2(data2g_b);%将频域转换到空域
+data2g_b=uint8(real(data2g_b));%空域中的值只取实部
+data2g_g=ifftshift(G2_g);
+data2g_g=ifft2(data2g_g);%将频域转换到空域
+data2g_g=uint8(real(data2g_g));%空域中的值只取实部
+figure(3)
+subplot(1,2,1);
+imshow(data2g_b);title('laplace hp');
+subplot(1,2,2);
+imshow(data2g_g);title('unmask hp');
+a=0;
+a1=0;
+a2=0;
+for u=1:1:P2
+    for v=1:1:Q2
+        b1=(abs(G2_b(u,v)))^2;
+        b2=(abs(G2_g(u,v)))^2;
+        a1=a1+b1;
+        a2=a2+b2;
+        b=(abs(data2F(u,v)))^2;
+        a=a+b;
+    end
+end
+gpb2_b=a1/a;
+gpb2_g=a2/a;
+gpb1_b
+gpb1_g
+gpb2_b
+gpb2_g
